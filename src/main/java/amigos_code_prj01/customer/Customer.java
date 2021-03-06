@@ -1,4 +1,4 @@
-package customer;
+package amigos_code_prj01.customer;
 
 import java.util.UUID;
 

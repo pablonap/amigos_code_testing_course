@@ -2,10 +2,14 @@ package customer;
 
 import java.util.UUID;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 
+@Entity
 public class Customer {
 
+	@Id
 	private UUID id;
 
 	@NotBlank
@@ -13,6 +17,9 @@ public class Customer {
 
 	@NotBlank
 	private String phoneNumber;
+	
+	public Customer() {
+	}
 
 	public Customer(UUID id, String name, String phoneNumber) {
 		this.id = id;

@@ -1,7 +1,6 @@
-package amigos_code_prj01;
+package amigos_code_prj01.testing.customer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Optional;
 import java.util.UUID;

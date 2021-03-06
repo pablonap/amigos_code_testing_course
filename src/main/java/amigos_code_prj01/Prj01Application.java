@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AmigosCodePrj01Application {
+public class Prj01Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AmigosCodePrj01Application.class, args);
+		SpringApplication.run(Prj01Application.class, args);
 	}
 
 }

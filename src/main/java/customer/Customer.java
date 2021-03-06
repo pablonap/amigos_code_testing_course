@@ -2,10 +2,16 @@ package customer;
 
 import java.util.UUID;
 
+import javax.validation.constraints.NotBlank;
+
 public class Customer {
 
 	private UUID id;
+
+	@NotBlank
 	private String name;
+
+	@NotBlank
 	private String phoneNumber;
 
 	public Customer(UUID id, String name, String phoneNumber) {

@@ -2,6 +2,7 @@ package amigos_code_prj01.customer;
 
 import java.util.UUID;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
@@ -13,9 +14,11 @@ public class Customer {
 	private UUID id;
 
 	@NotBlank
+    @Column(nullable = false)
 	private String name;
 
 	@NotBlank
+    @Column(nullable = false)
 	private String phoneNumber;
 	
 	public Customer() {

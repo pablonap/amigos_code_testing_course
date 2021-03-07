@@ -18,10 +18,10 @@ public class CustomerRegistrationService {
 	public void registerNewCustomer(CustomerRegistrationRequest request) {
 		Customer requestedCustomer = request.getCustomer();
 		
-		Optional<Customer> optCustomerFromBd = customerRepository.selectCustomerByPhoneNumber(requestedCustomer.getPhoneNumber());
+		Optional<Customer> optCustomerFromDb = customerRepository.selectCustomerByPhoneNumber(requestedCustomer.getPhoneNumber());
 
-		if (optCustomerFromBd.isPresent()) {
-			Customer customerFromBd = optCustomerFromBd.get();
+		if (optCustomerFromDb.isPresent()) {
+			Customer customerFromBd = optCustomerFromDb.get();
 			if (customerFromBd.getName().equals(requestedCustomer.getName())) {
 				return;
 			} 

@@ -1,6 +1,7 @@
 package amigos_code_prj01.testing.customer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -74,6 +75,27 @@ public class CustomerRegistrationServiceTest {
 		// Another option:
 //		then(customerRepository).should().selectCustomerByPhoneNumber(phoneNumber);
 //		then(customerRepository).shouldHaveNoMoreInteractions();
+	}
+
+	@Test
+	void itShouldThrowWhenPhoneNumberIsTaken() {
+		// given
+		String phoneNumber = "123";
+		Customer savedCustomer = new Customer(UUID.randomUUID(), "luca", phoneNumber);
+		Customer requestedCustomer = new Customer(UUID.randomUUID(), "john", phoneNumber);
+		
+		CustomerRegistrationRequest request = new CustomerRegistrationRequest(requestedCustomer);
+		
+		given(customerRepository.selectCustomerByPhoneNumber(phoneNumber))
+			.willReturn(Optional.of(savedCustomer));
+		
+		// when
+		// then
+		assertThatThrownBy(() -> underTest.registerNewCustomer(request))
+			.hasMessageContaining(String.format("phone number [%s] is taken", phoneNumber))
+			.isInstanceOf(IllegalStateException.class);
+		
+		then(customerRepository).should(never()).save(any(Customer.class));
 	}
 
 }

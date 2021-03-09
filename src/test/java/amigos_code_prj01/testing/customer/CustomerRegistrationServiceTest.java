@@ -1,8 +1,10 @@
 package amigos_code_prj01.testing.customer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -51,6 +53,27 @@ public class CustomerRegistrationServiceTest {
 		
 		Customer customerArgumentCaptorValue = customerArgumentCaptor.getValue();
 		assertThat(customerArgumentCaptorValue).isEqualTo(customer);
+	}
+
+	@Test
+	void itShouldNotSaveNewCustomerWhenCustomerExists() {
+		// given
+		String phoneNumber = "777";
+		Customer customer = new Customer(UUID.randomUUID(), "luca", phoneNumber);
+		
+		CustomerRegistrationRequest request = new CustomerRegistrationRequest(customer);
+		
+		given(customerRepository.selectCustomerByPhoneNumber(phoneNumber))
+			.willReturn(Optional.of(customer));
+		
+		// when
+		underTest.registerNewCustomer(request);
+		
+		// then
+		then(customerRepository).should(never()).save(any());
+		// Another option:
+//		then(customerRepository).should().selectCustomerByPhoneNumber(phoneNumber);
+//		then(customerRepository).shouldHaveNoMoreInteractions();
 	}
 
 }

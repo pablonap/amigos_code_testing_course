@@ -1,6 +1,7 @@
 package amigos_code_prj01.customer;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,10 @@ public class CustomerRegistrationService {
 			} 
 			
 			throw new IllegalStateException(String.format("phone number [%s] is taken", requestedCustomer.getPhoneNumber()));
+		}
+		
+		if (request.getCustomer().getId() == null) {
+			request.getCustomer().setId(UUID.randomUUID());
 		}
 		
 		customerRepository.save(requestedCustomer);

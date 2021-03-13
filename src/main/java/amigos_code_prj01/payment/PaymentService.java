@@ -27,7 +27,7 @@ public class PaymentService {
 		this.cardPaymentCharger = cardPaymentCharger;
 	}
 
-	void chargeCard(UUID customerId, PaymentRequest paymentRequest) {
+	public void chargeCard(UUID customerId, PaymentRequest paymentRequest) {
 		Payment payment = paymentRequest.getPayment();
 		
 		if (payment == null) {
@@ -36,11 +36,10 @@ public class PaymentService {
 
 		Optional<Customer> optCustomerFromDb = customerRepository.findById(customerId);
 
-		if (optCustomerFromDb.isPresent()) {
+		if (optCustomerFromDb.isPresent() == false) {
 			throw new IllegalStateException(String.format("Customer with id [%s] not found", customerId));
 		}
 
-		
 		boolean isCurrencySupported = ACCEPTED_CURRENCIES.stream()
 				.anyMatch(c -> c.equals(payment.getCurrency()));
 

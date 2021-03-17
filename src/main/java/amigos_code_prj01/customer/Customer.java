@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@JsonIgnoreProperties(value = {"id"}, allowGetters = true)
+@JsonIgnoreProperties(allowGetters = true)
 public class Customer {
 
 	@Id
@@ -93,7 +93,9 @@ public class Customer {
 			return false;
 		return true;
 	}
-	
-	
 
+	@Override
+	public String toString() {
+		return "Customer [id=" + id + ", name=" + name + ", phoneNumber=" + phoneNumber + "]";
+	}
 }

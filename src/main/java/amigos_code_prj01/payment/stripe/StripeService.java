@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import com.stripe.exception.StripeException;
@@ -15,8 +16,12 @@ import amigos_code_prj01.payment.CardPaymentCharge;
 import amigos_code_prj01.payment.CardPaymentCharger;
 import amigos_code_prj01.payment.Currency;
 
-@Service
 //This code is taken from https://stripe.com/docs/api
+@Service
+@ConditionalOnProperty(
+		value = "stripe.enabled",
+		havingValue = "true"
+		)
 public class StripeService implements CardPaymentCharger {
 	
 	private final StripeApi stripeApi;

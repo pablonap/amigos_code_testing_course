@@ -32,6 +32,10 @@ import amigos_code_prj01.payment.PaymentRequest;
 @AutoConfigureMockMvc
 public class PaymentIntegrationTest {
 	
+	// Here I'm breaking the rule about having injected only the 
+	// class that I want to test (MockMvc in this case) because 
+	// I don't have an endpoint to give me the list of payments 
+	// so I'm simply using the repository.
 	@Autowired
 	private PaymentRepository paymentRepository;
 	

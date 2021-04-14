@@ -15,48 +15,56 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 
 import amigos_code_prj01.customer.Customer;
 import amigos_code_prj01.customer.CustomerRegistrationRequest;
-import amigos_code_prj01.customer.CustomerRegistrationService;
+import amigos_code_prj01.customer.CustomerRegistrationRequestDto;
 import amigos_code_prj01.customer.CustomerRepository;
+import amigos_code_prj01.customer.CustomerService;
 import amigos_code_prj01.utils.PhoneNumberValidator;
 
 @ExtendWith(MockitoExtension.class)
-public class CustomerRegistrationServiceTest {
-	
+public class CustomerServiceTest {
+
 	@Mock
-    private CustomerRepository customerRepository;
-	
+	private CustomerRepository customerRepository;
+
 	@Mock
 	private PhoneNumberValidator phoneNumberValidator;
-	
+
+	@Mock
+	ModelMapper mapper;
+
 	@InjectMocks
-	private CustomerRegistrationService underTest;
+	private CustomerService underTest;
 
 	@Captor
 	private ArgumentCaptor<Customer> customerArgumentCaptor;
-	
+
 	@Test
 	void itShouldSaveNewCustomer() {
 		// given
 		String phoneNumber = "777";
-		Customer customer = new Customer("luca", phoneNumber);
-		
-		CustomerRegistrationRequest request = new CustomerRegistrationRequest(customer);
-		
-		given(customerRepository.selectCustomerByPhoneNumber(phoneNumber))
-			.willReturn(Optional.empty());
-		
+
+		Customer customer = CustomerUtils.customerOf();
+
+		CustomerRegistrationRequest request = new CustomerRegistrationRequest(Mockito.mock(CustomerRegistrationRequestDto.class));
+
+		given(customerRepository.selectCustomerByPhoneNumber(phoneNumber)).willReturn(Optional.empty());
+
 		given(phoneNumberValidator.test(phoneNumber)).willReturn(true);
-		
+
+		given(mapper.map(any(), any())).willReturn(customer);
+
 		// when
 		underTest.registerNewCustomer(request);
-		
+
 		// then
 		then(customerRepository).should().save(customerArgumentCaptor.capture());
-		
+
 		Customer customerArgumentCaptorValue = customerArgumentCaptor.getValue();
 		assertThat(customerArgumentCaptorValue).isEqualTo(customer);
 	}
@@ -65,16 +73,18 @@ public class CustomerRegistrationServiceTest {
 	void itShouldNotSaveNewCustomerWhenPhoneNumberIsInvalid() {
 		// given
 		String phoneNumber = "777";
-		Customer customer = new Customer("luca", phoneNumber);
-		
-		CustomerRegistrationRequest request = new CustomerRegistrationRequest(customer);
-		
+
+		Customer customer = CustomerUtils.customerOf();
+
+		CustomerRegistrationRequest request = new CustomerRegistrationRequest(Mockito.mock(CustomerRegistrationRequestDto.class));
+
+		given(mapper.map(any(), any())).willReturn(customer);
+
 		given(phoneNumberValidator.test(phoneNumber)).willReturn(false);
-		
+
 		// when
-		assertThatThrownBy(() -> underTest.registerNewCustomer(request))
-			.isInstanceOf(IllegalStateException.class);
-		
+		assertThatThrownBy(() -> underTest.registerNewCustomer(request)).isInstanceOf(IllegalStateException.class);
+
 		// then
 		then(customerRepository).shouldHaveNoInteractions();
 	}
@@ -83,21 +93,23 @@ public class CustomerRegistrationServiceTest {
 	void itShouldSaveNewCustomerWhenIdIsNull() {
 		// given
 		String phoneNumber = "777";
-		Customer customer = new Customer(null, "luca", phoneNumber);
-		
-		CustomerRegistrationRequest request = new CustomerRegistrationRequest(customer);
-		
-		given(customerRepository.selectCustomerByPhoneNumber(phoneNumber))
-			.willReturn(Optional.empty());
+
+		Customer customer = CustomerUtils.customerOf();
+
+		CustomerRegistrationRequest request = new CustomerRegistrationRequest(Mockito.mock(CustomerRegistrationRequestDto.class));
+
+		given(mapper.map(any(), any())).willReturn(customer);
+
+		given(customerRepository.selectCustomerByPhoneNumber(phoneNumber)).willReturn(Optional.empty());
 
 		given(phoneNumberValidator.test(phoneNumber)).willReturn(true);
-		
+
 		// when
 		underTest.registerNewCustomer(request);
-		
+
 		// then
 		then(customerRepository).should().save(customerArgumentCaptor.capture());
-		
+
 		Customer customerArgumentCaptorValue = customerArgumentCaptor.getValue();
 
 		assertThat(customerArgumentCaptorValue.getName()).isEqualTo(customer.getName());
@@ -107,18 +119,20 @@ public class CustomerRegistrationServiceTest {
 	void itShouldNotSaveNewCustomerWhenCustomerExists() {
 		// given
 		String phoneNumber = "777";
-		Customer customer = new Customer("luca", phoneNumber);
-		
-		CustomerRegistrationRequest request = new CustomerRegistrationRequest(customer);
-		
-		given(customerRepository.selectCustomerByPhoneNumber(phoneNumber))
-			.willReturn(Optional.of(customer));
+
+		Customer customer = CustomerUtils.customerOf();
+
+		CustomerRegistrationRequest request = new CustomerRegistrationRequest(Mockito.mock(CustomerRegistrationRequestDto.class));
+
+		given(mapper.map(any(), any())).willReturn(customer);
+
+		given(customerRepository.selectCustomerByPhoneNumber(phoneNumber)).willReturn(Optional.of(customer));
 
 		given(phoneNumberValidator.test(phoneNumber)).willReturn(true);
-		
+
 		// when
 		underTest.registerNewCustomer(request);
-		
+
 		// then
 		then(customerRepository).should(never()).save(any());
 		// Another option:
@@ -129,23 +143,26 @@ public class CustomerRegistrationServiceTest {
 	@Test
 	void itShouldThrowWhenPhoneNumberIsTaken() {
 		// given
-		String phoneNumber = "123";
-		Customer savedCustomer = new Customer("luca", phoneNumber);
-		Customer requestedCustomer = new Customer("john", phoneNumber);
-		
-		CustomerRegistrationRequest request = new CustomerRegistrationRequest(requestedCustomer);
-		
-		given(customerRepository.selectCustomerByPhoneNumber(phoneNumber))
-			.willReturn(Optional.of(savedCustomer));
+		String phoneNumber = "777";
+
+		Customer customer = CustomerUtils.customerOf();
+		Customer savedCustomer = CustomerUtils.customerOf();
+		savedCustomer.setName("peter");
+
+		CustomerRegistrationRequest request = new CustomerRegistrationRequest(Mockito.mock(CustomerRegistrationRequestDto.class));
+
+		given(mapper.map(any(), any())).willReturn(customer);
+
+		given(customerRepository.selectCustomerByPhoneNumber(phoneNumber)).willReturn(Optional.of(savedCustomer));
 
 		given(phoneNumberValidator.test(phoneNumber)).willReturn(true);
-		
+
 		// when
 		// then
 		assertThatThrownBy(() -> underTest.registerNewCustomer(request))
-			.hasMessageContaining(String.format("phone number [%s] is taken", phoneNumber))
-			.isInstanceOf(IllegalStateException.class);
-		
+				.hasMessageContaining(String.format("phone number [%s] is taken", phoneNumber))
+				.isInstanceOf(IllegalStateException.class);
+
 		then(customerRepository).should(never()).save(any(Customer.class));
 	}
 

@@ -2,25 +2,33 @@ package amigos_code_prj01.customer;
 
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import amigos_code_prj01.utils.PhoneNumberValidator;
 
 @Service
-public class CustomerRegistrationService {
+public class CustomerService {
 	
 	private final CustomerRepository customerRepository;
 	private final PhoneNumberValidator phoneNumberValidator;
+	private final ModelMapper mapper;
 	
 	@Autowired
-	public CustomerRegistrationService(CustomerRepository customerRepository, PhoneNumberValidator phoneNumberValidator) {
+	public CustomerService(CustomerRepository customerRepository, PhoneNumberValidator phoneNumberValidator, ModelMapper mapper) {
 		this.customerRepository = customerRepository;
 		this.phoneNumberValidator = phoneNumberValidator;
+		this.mapper = mapper;
 	}
 
 	public void registerNewCustomer(CustomerRegistrationRequest request) {
-		Customer requestedCustomer = request.getCustomer();
+		CustomerRegistrationRequestDto dto = request.getCustomer();
+		
+		Customer requestedCustomer = mapper.map(dto, Customer.class);
+
 		String phoneNumber = requestedCustomer.getPhoneNumber();
 		
 		if (!phoneNumberValidator.test(phoneNumber)) {
@@ -39,6 +47,10 @@ public class CustomerRegistrationService {
 		}
 		
 		customerRepository.save(requestedCustomer);
+	}
+	
+	public Page<ICustomer> findAllCustomers(Pageable pageable) {
+		return customerRepository.findAllPageableCustomers(pageable).map(r -> r);
 	}
 
 }

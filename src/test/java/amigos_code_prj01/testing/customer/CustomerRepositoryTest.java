@@ -30,19 +30,16 @@ class CustomerRepositoryTest {
 	@Test
 	void itShouldSelectCustomerByPheNumber() {
 		// given
-		String name = "john";
-		String phoneNumber = "777";
-
-		Customer customer = new Customer(null, name, phoneNumber);
+		Customer customer = CustomerUtils.customerOf();
 		
 		// when
 		underTest.save(customer);
-		Optional<Customer> optCustomerFromDb = underTest.selectCustomerByPhoneNumber(phoneNumber);
+		Optional<Customer> optCustomerFromDb = underTest.selectCustomerByPhoneNumber(customer.getPhoneNumber());
 		
 		// then
 		assertThat(optCustomerFromDb).isPresent().hasValueSatisfying(c -> {
-			assertThat(c.getName()).isEqualTo(name);
-			assertThat(c.getPhoneNumber()).isEqualTo(phoneNumber);
+			assertThat(c.getName()).isEqualTo(customer.getName());
+			assertThat(c.getPhoneNumber()).isEqualTo(customer.getPhoneNumber());
 		});
 	}
 
@@ -61,31 +58,23 @@ class CustomerRepositoryTest {
 	@Test
 	void itShouldSaveCustomer() {
 		// given
-		Long id = 1L;
-		String name = "john";
-		String phone = "777";
-		
-		Customer customer = new Customer(id, name, phone);
+		Customer customer = CustomerUtils.customerOf();
 		
 		// when
 		underTest.save(customer);
-		Optional<Customer> optCustomerFromDb = underTest.findById(id);
+		Optional<Customer> optCustomerFromDb = underTest.findById(1L);
 		
 		// then
 		assertThat(optCustomerFromDb).isPresent().hasValueSatisfying(c -> {
-			assertThat(c.getId()).isEqualTo(id);
-			assertThat(c.getName()).isEqualTo(name);
-			assertThat(c.getPhoneNumber()).isEqualTo(phone);
+			assertThat(c.getName()).isEqualTo(customer.getName());
+			assertThat(c.getPhoneNumber()).isEqualTo(customer.getPhoneNumber());
 		});
 	}
 	
 	@Test
 	void itShouldSaveCustomerWithIdNull() {
 		// given
-		String name = "john";
-		String phone = "777";
-		
-		Customer customer = new Customer(null, name, phone);
+		Customer customer = CustomerUtils.customerOf();
 		
 		// when
 		long amounUserstBeforeSave = underTest.count();
@@ -99,9 +88,8 @@ class CustomerRepositoryTest {
 	@Test
 	void itShouldNotSaveCustomerWhenNameIsNull() {
 		// given
-		String phone = "777";
-		
-		Customer customer = new Customer(null, null, phone);
+		Customer customer = CustomerUtils.customerOf();
+		customer.setName(null);
 		
 		// then
 		assertThatThrownBy(() -> underTest.save(customer))
@@ -113,9 +101,8 @@ class CustomerRepositoryTest {
 	@Test
 	void itShouldNotSaveCustomerWhenPhoneNumberIsnull() {
 		// given
-		String name = "john";
-		
-		Customer customer = new Customer(null, name, null);
+		Customer customer = CustomerUtils.customerOf();
+		customer.setPhoneNumber(null);
 		
 		// then
 		assertThatThrownBy(() -> underTest.save(customer))
@@ -123,6 +110,5 @@ class CustomerRepositoryTest {
 				"not-null property references a null or transient value : amigos_code_prj01.customer.Customer.phoneNumber")
 		.isInstanceOf(DataIntegrityViolationException.class);
 	}
-
 
 }

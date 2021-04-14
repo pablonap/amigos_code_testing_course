@@ -1,4 +1,4 @@
-package amigos_code_prj01.testing.payment.stripe;
+package amigos_code_prj01.testing.payment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.math.BigDecimal;
 import java.util.Objects;
-import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import amigos_code_prj01.customer.Customer;
 import amigos_code_prj01.customer.CustomerRegistrationRequest;
+import amigos_code_prj01.customer.CustomerRegistrationRequestDto;
 import amigos_code_prj01.payment.Currency;
 import amigos_code_prj01.payment.Payment;
 import amigos_code_prj01.payment.PaymentRepository;
@@ -31,60 +31,56 @@ import amigos_code_prj01.payment.PaymentRequest;
 @SpringBootTest
 @AutoConfigureMockMvc
 public class PaymentIntegrationTest {
-	
-	// Here I'm breaking the rule about having injected only the 
-	// class that I want to test (MockMvc in this case) because 
-	// I don't have an endpoint to give me the list of payments 
+
+	// Here I'm breaking the rule about having injected only the
+	// class that I want to test (MockMvc in this case) because
+	// I don't have an endpoint to give me the list of payments
 	// so I'm simply using the repository.
 	@Autowired
 	private PaymentRepository paymentRepository;
-	
-    @Autowired
-    private MockMvc mockMvc;
+
+	@Autowired
+	private MockMvc mockMvc;
+
 	@Test
 	void itShouldCreatePaymentSuccessfully() throws Exception {
 		// given
-		Long customerIdFromDb = 1L;
-		Customer customer = new Customer(null, "james", "+541154841444");
-		
-		CustomerRegistrationRequest customerRegistrationRequest = new CustomerRegistrationRequest(customer);
+		CustomerRegistrationRequestDto dto = new CustomerRegistrationRequestDto();
+		dto.setName("luca");
+		dto.setPassword("luca123");
+		dto.setPhoneNumber("+541154841444");
 
-		ResultActions customerRegResultActions = mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/customer-registration")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(Objects.requireNonNull(objectToJson(customerRegistrationRequest))));
+		CustomerRegistrationRequest customerRegistrationRequest 
+			= new CustomerRegistrationRequest(dto);
 
-        long paymentId = 1L;
+		ResultActions customerRegResultActions = mockMvc.perform(
+				MockMvcRequestBuilders.put("/api/v1/customer-registration").contentType(MediaType.APPLICATION_JSON)
+						.content(Objects.requireNonNull(objectToJson(customerRegistrationRequest))));
 
-        Payment payment = new Payment(
-                paymentId,
-                customerIdFromDb,
-                new BigDecimal("100.00"),
-                Currency.GBP,
-                "x0x0x0x0",
-                "Zakat"
-        );
+		long paymentId = 1L;
 
-        PaymentRequest paymentRequest = new PaymentRequest(payment);
-		
+		Payment payment = new Payment(paymentId, 1L, new BigDecimal("100.00"), Currency.GBP, "x0x0x0x0",
+				"Zakat");
+
+		PaymentRequest paymentRequest = new PaymentRequest(payment);
+
 		// when
-        ResultActions paymentResultActions = mockMvc.perform(post("/api/v1/payment")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(Objects.requireNonNull(objectToJson(paymentRequest))));
+		ResultActions paymentResultActions = mockMvc.perform(post("/api/v1/payment")
+				.contentType(MediaType.APPLICATION_JSON).content(Objects.requireNonNull(objectToJson(paymentRequest))));
 
 		// then
 		customerRegResultActions.andExpect(status().isOk());
-        paymentResultActions.andExpect(status().isOk());
-        
-        assertThat(paymentRepository.findById(paymentId))
-        .isPresent()
-        .hasValueSatisfying(p -> assertThat(p).isEqualTo(payment));
+		paymentResultActions.andExpect(status().isOk());
 
+		assertThat(paymentRepository.findById(paymentId)).isPresent()
+				.hasValueSatisfying(p -> assertThat(p).isEqualTo(payment));
 
 	}
+
 	private String objectToJson(Object object) {
 		try {
 			return new ObjectMapper().writeValueAsString(object);
-		} catch(JsonProcessingException e) {
+		} catch (JsonProcessingException e) {
 			fail("Failed to convert object to json");
 			return null;
 		}

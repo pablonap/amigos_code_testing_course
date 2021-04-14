@@ -4,19 +4,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CustomerRegistrationRequest {
 	
-	private final Customer customer;
+	private final CustomerRegistrationRequestDto dto;
 
-	public CustomerRegistrationRequest(@JsonProperty("customer") Customer customer) {
-		this.customer = customer;
+	public CustomerRegistrationRequest(@JsonProperty("customer") CustomerRegistrationRequestDto dto) {
+		this.dto = dto;
 	}
 
-	public Customer getCustomer() {
-		return customer;
+	public CustomerRegistrationRequestDto getCustomer() {
+		return dto;
 	}
 
 	@Override
 	public String toString() {
-		return "CustomerRegistrationRequest [customer=" + customer + "]";
+		return "CustomerRegistrationRequest [customer=" + dto + "]";
 	}
 
 }

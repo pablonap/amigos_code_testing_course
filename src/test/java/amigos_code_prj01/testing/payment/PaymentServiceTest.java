@@ -47,7 +47,7 @@ public class PaymentServiceTest {
 	@Test
 	void itShouldChargeCardSuccessfully() {
 		// given
-		UUID customerId = UUID.randomUUID();
+		Long customerId = 7L;
 		Payment payment = new Payment(1L, customerId, new BigDecimal(1250), Currency.USD, "Visa", "english course");
 		PaymentRequest request = new PaymentRequest(payment);
 		
@@ -76,7 +76,7 @@ public class PaymentServiceTest {
 		PaymentRequest request = new PaymentRequest(payment);
 		
 		// when
-		assertThatThrownBy(() -> underTest.chargeCard(UUID.randomUUID(), request))
+		assertThatThrownBy(() -> underTest.chargeCard(7L, request))
 		.hasMessageContaining("Payment not received")
 		.isInstanceOf(IllegalStateException.class);
 
@@ -90,7 +90,7 @@ public class PaymentServiceTest {
 		// given
 		Payment payment = new Payment();
 		PaymentRequest request = new PaymentRequest(payment);
-		UUID customerId = UUID.randomUUID();
+		Long customerId = 7L;
 		
 		given(customerRepository.findById(any())).willReturn(Optional.empty());
 		
@@ -107,7 +107,7 @@ public class PaymentServiceTest {
 	@Test
 	void itShouldThrowWhenCardIsNotDebited() {
 		// given
-		UUID customerId = UUID.randomUUID();
+		Long customerId = 7L;
 		Payment payment = new Payment(1L, customerId, new BigDecimal(1250), Currency.USD, "Visa", "english course");
 		PaymentRequest request = new PaymentRequest(payment);
 		
@@ -131,11 +131,9 @@ public class PaymentServiceTest {
 	@Test
 	void itShouldNotChargeCardWhenCurrencyNotSupported() {
 		// given
-		UUID customerId = UUID.randomUUID();
+		Long customerId = 7L;
 		Payment payment = new Payment(1L, customerId, new BigDecimal(1250), Currency.EUR, "Visa", "english course");
 		PaymentRequest request = new PaymentRequest(payment);
-		
-		CardPaymentCharge cardPaymentCharge = new CardPaymentCharge(Boolean.FALSE);
 		
 		given(customerRepository.findById(customerId)).willReturn(Optional.of(Mockito.mock(Customer.class)));
 		

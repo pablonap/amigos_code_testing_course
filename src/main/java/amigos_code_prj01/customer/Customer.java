@@ -1,46 +1,56 @@
 package amigos_code_prj01.customer;
 
-import java.util.UUID;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @JsonIgnoreProperties(allowGetters = true)
+@Table(name="customer")
 public class Customer {
 
 	@Id
-	private UUID id;
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private Long id;
 
 	@NotBlank
+	@NotNull
     @Column(nullable = false)
 	private String name;
 
 	@NotBlank
-    @Column(nullable = false)
+    @Column(name="phone_number", nullable = false)
 	private String phoneNumber;
 	
 	public Customer() {
 	}
 
-	public Customer(UUID id, String name, String phoneNumber) {
+	public Customer(Long id, String name, String phoneNumber) {
 		this.id = id;
 		this.name = name;
 		this.phoneNumber = phoneNumber;
 	}
 
-	public UUID getId() {
+	public Customer(String name, String phoneNumber) {
+		this.name = name;
+		this.phoneNumber = phoneNumber;
+	}
+
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(UUID id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
-
+	
 	public String getName() {
 		return name;
 	}
@@ -48,7 +58,7 @@ public class Customer {
 	public void setName(String name) {
 		this.name = name;
 	}
-
+	
 	public String getPhoneNumber() {
 		return phoneNumber;
 	}
@@ -56,7 +66,7 @@ public class Customer {
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -93,7 +103,7 @@ public class Customer {
 			return false;
 		return true;
 	}
-
+	
 	@Override
 	public String toString() {
 		return "Customer [id=" + id + ", name=" + name + ", phoneNumber=" + phoneNumber + "]";

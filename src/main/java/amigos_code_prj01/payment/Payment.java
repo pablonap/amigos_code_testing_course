@@ -1,7 +1,6 @@
 package amigos_code_prj01.payment;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -14,7 +13,7 @@ public class Payment {
 	@GeneratedValue
 	private Long paymentId;
 	
-	private UUID customerId;
+	private Long customerId;
 	
 	private BigDecimal amount;
 	
@@ -24,7 +23,7 @@ public class Payment {
 	
 	private String description;
 
-	public Payment(Long paymentId, UUID customerId, BigDecimal amount, Currency currency, String source,
+	public Payment(Long paymentId, Long customerId, BigDecimal amount, Currency currency, String source,
 			String description) {
 		this.paymentId = paymentId;
 		this.customerId = customerId;
@@ -45,11 +44,11 @@ public class Payment {
 		this.paymentId = paymentId;
 	}
 
-	public UUID getCustomerId() {
+	public Long getCustomerId() {
 		return customerId;
 	}
 
-	public void setCustomerId(UUID customerId) {
+	public void setCustomerId(Long customerId) {
 		this.customerId = customerId;
 	}
 

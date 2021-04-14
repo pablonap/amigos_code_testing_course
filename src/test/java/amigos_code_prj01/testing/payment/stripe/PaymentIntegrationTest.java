@@ -44,8 +44,8 @@ public class PaymentIntegrationTest {
 	@Test
 	void itShouldCreatePaymentSuccessfully() throws Exception {
 		// given
-		UUID customerId = UUID.randomUUID();
-		Customer customer = new Customer(customerId, "james", "+541154841444");
+		Long customerIdFromDb = 1L;
+		Customer customer = new Customer(null, "james", "+541154841444");
 		
 		CustomerRegistrationRequest customerRegistrationRequest = new CustomerRegistrationRequest(customer);
 
@@ -57,7 +57,7 @@ public class PaymentIntegrationTest {
 
         Payment payment = new Payment(
                 paymentId,
-                customerId,
+                customerIdFromDb,
                 new BigDecimal("100.00"),
                 Currency.GBP,
                 "x0x0x0x0",

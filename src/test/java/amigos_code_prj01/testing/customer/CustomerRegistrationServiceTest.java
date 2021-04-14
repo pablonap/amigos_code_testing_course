@@ -8,7 +8,6 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +42,7 @@ public class CustomerRegistrationServiceTest {
 	void itShouldSaveNewCustomer() {
 		// given
 		String phoneNumber = "777";
-		Customer customer = new Customer(UUID.randomUUID(), "luca", phoneNumber);
+		Customer customer = new Customer("luca", phoneNumber);
 		
 		CustomerRegistrationRequest request = new CustomerRegistrationRequest(customer);
 		
@@ -66,7 +65,7 @@ public class CustomerRegistrationServiceTest {
 	void itShouldNotSaveNewCustomerWhenPhoneNumberIsInvalid() {
 		// given
 		String phoneNumber = "777";
-		Customer customer = new Customer(UUID.randomUUID(), "luca", phoneNumber);
+		Customer customer = new Customer("luca", phoneNumber);
 		
 		CustomerRegistrationRequest request = new CustomerRegistrationRequest(customer);
 		
@@ -102,14 +101,13 @@ public class CustomerRegistrationServiceTest {
 		Customer customerArgumentCaptorValue = customerArgumentCaptor.getValue();
 
 		assertThat(customerArgumentCaptorValue.getName()).isEqualTo(customer.getName());
-		assertThat(customerArgumentCaptorValue.getId()).isNotNull();
 	}
 
 	@Test
 	void itShouldNotSaveNewCustomerWhenCustomerExists() {
 		// given
 		String phoneNumber = "777";
-		Customer customer = new Customer(UUID.randomUUID(), "luca", phoneNumber);
+		Customer customer = new Customer("luca", phoneNumber);
 		
 		CustomerRegistrationRequest request = new CustomerRegistrationRequest(customer);
 		
@@ -132,8 +130,8 @@ public class CustomerRegistrationServiceTest {
 	void itShouldThrowWhenPhoneNumberIsTaken() {
 		// given
 		String phoneNumber = "123";
-		Customer savedCustomer = new Customer(UUID.randomUUID(), "luca", phoneNumber);
-		Customer requestedCustomer = new Customer(UUID.randomUUID(), "john", phoneNumber);
+		Customer savedCustomer = new Customer("luca", phoneNumber);
+		Customer requestedCustomer = new Customer("john", phoneNumber);
 		
 		CustomerRegistrationRequest request = new CustomerRegistrationRequest(requestedCustomer);
 		

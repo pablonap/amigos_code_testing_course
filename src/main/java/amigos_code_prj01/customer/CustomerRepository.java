@@ -1,13 +1,12 @@
 package amigos_code_prj01.customer;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-public interface CustomerRepository extends CrudRepository<Customer, UUID> {
+public interface CustomerRepository extends CrudRepository<Customer, Long> {
 	
 	@Query(
 			value = "select id, name, phone_number "

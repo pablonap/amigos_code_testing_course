@@ -2,7 +2,6 @@ package amigos_code_prj01.payment;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +26,7 @@ public class PaymentService {
 		this.cardPaymentCharger = cardPaymentCharger;
 	}
 
-	public void chargeCard(UUID customerId, PaymentRequest paymentRequest) {
+	public void chargeCard(Long customerId, PaymentRequest paymentRequest) {
 		Payment payment = paymentRequest.getPayment();
 		
 		if (payment == null) {

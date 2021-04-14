@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/v1/customer-registration")
+@RequestMapping("/api/v1")
 public class CustomerRegistrationController {
 	
 	private final CustomerRegistrationService customerRegistrationService;
@@ -19,10 +19,10 @@ public class CustomerRegistrationController {
 		this.customerRegistrationService = customerRegistrationService;
 	}
 
-	@PutMapping
+	@PutMapping("/customer-registration")
 	public void registerNewCustomer(
 			@Valid @RequestBody CustomerRegistrationRequest request) {
 		customerRegistrationService.registerNewCustomer(request);
 	}
-
+	
 }

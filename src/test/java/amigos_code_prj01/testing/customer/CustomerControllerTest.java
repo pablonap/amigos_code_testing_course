@@ -120,6 +120,81 @@ public class CustomerControllerTest {
         // assertion
         isExptectedContentEqualsToPageResults(expectedResponse, resultActions);
     }
+
+    @Test
+    public void itShouldReturnThreePageableCustomersInTheFirstPageWhenAskingByAllCustomers()
+            throws Exception {
+        // given
+        List<CustomerResponseDto> expectedResponse =
+                IntStream.rangeClosed(1, 3).mapToObj(i -> {
+                	final String name = "customer_" + i;
+                	final String phoneNumberDigit = String.valueOf(i);
+                	final String phone = phoneNumberDigit + phoneNumberDigit + phoneNumberDigit + phoneNumberDigit;
+
+                    return customerResponseDtoOf(name, phone);
+                }).collect(Collectors.toList());
+
+        // method execution
+        ResultActions resultActions = mvc.perform(get(ENDPOINT)
+                .param("page", "0")
+                .param("size", "3")
+                .contentType(MediaType.APPLICATION_JSON))
+                	.andExpect(jsonPath("$.numberOfElements", is(3)))
+                	.andExpect(jsonPath("$.totalElements", is(5)))
+                	.andExpect(jsonPath("$.last", is(false)))
+                	.andExpect(status().isOk());
+
+        // assertion
+        isExptectedContentEqualsToPageResults(expectedResponse, resultActions);
+    }
+
+    @Test
+    public void itShouldReturnTwoPageableCustomersInTheSecondPageWhenAskingByAllCustomers()
+            throws Exception {
+        // given
+        List<CustomerResponseDto> expectedResponse =
+                IntStream.rangeClosed(1, 2).mapToObj(i -> {
+                	int number = i + 3;
+                	final String name = "customer_" + number;
+                	final String phoneNumberDigit = String.valueOf(number);
+                	final String phone = phoneNumberDigit + phoneNumberDigit + phoneNumberDigit + phoneNumberDigit;
+
+                    return customerResponseDtoOf(name, phone);
+                }).collect(Collectors.toList());
+
+        // method execution
+        ResultActions resultActions = mvc.perform(get(ENDPOINT)
+                .param("page", "1")
+                .param("size", "3")
+                .contentType(MediaType.APPLICATION_JSON))
+                	.andExpect(jsonPath("$.numberOfElements", is(2)))
+                	.andExpect(jsonPath("$.totalElements", is(5)))
+                	.andExpect(jsonPath("$.last", is(true)))
+                	.andExpect(status().isOk());
+
+        // assertion
+        isExptectedContentEqualsToPageResults(expectedResponse, resultActions);
+    }
+
+    @Test
+    public void itShouldReturnEmptyPageInTheThirdPageWhenAskingByAllCustomers()
+            throws Exception {
+        // given
+        List<CustomerResponseDto> expectedResponse = List.of();
+
+        // method execution
+        ResultActions resultActions = mvc.perform(get(ENDPOINT)
+                .param("page", "2")
+                .param("size", "3")
+                .contentType(MediaType.APPLICATION_JSON))
+                	.andExpect(jsonPath("$.numberOfElements", is(0)))
+                	.andExpect(jsonPath("$.totalElements", is(5)))
+                	.andExpect(jsonPath("$.last", is(true)))
+                	.andExpect(status().isOk());
+
+        // assertion
+        isExptectedContentEqualsToPageResults(expectedResponse, resultActions);
+    }
     
     private CustomerResponseDto customerResponseDtoOf(String name, String phone) {
     	CustomerResponseDto customerResponseDto =

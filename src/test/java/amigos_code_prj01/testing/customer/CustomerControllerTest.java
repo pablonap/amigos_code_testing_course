@@ -35,222 +35,180 @@ import amigos_code_prj01.customer.CustomerResponseDto;
 import amigos_code_prj01.testing.utils.RestResponsePage;
 
 @SpringBootTest
-@TestPropertySource({"classpath:application-test.properties"})
+@TestPropertySource({ "classpath:application-test.properties" })
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureMockMvc
 public class CustomerControllerTest {
-	
+
 	@Autowired
-    private MockMvc mvc;
+	private MockMvc mvc;
 
-    @Autowired
-    ObjectMapper objectMapper;
+	@Autowired
+	ObjectMapper objectMapper;
 
-    @Autowired
-    private CustomerRepository customerRepository;
-    
-    private static final String API_PREFIX = "/api/v1";
-    private static final String ENDPOINT = API_PREFIX + "/customers";
-    
-    @BeforeAll
-    void init() {
-        insertCustomers();
-    }
+	@Autowired
+	private CustomerRepository customerRepository;
 
-    private void insertCustomers() {
-        IntStream.rangeClosed(1, 5).mapToObj(i -> {
-        	final String name = "customer_" + i;
-        	final String phoneNumberDigit = String.valueOf(i);
-        	final String phone = phoneNumberDigit + phoneNumberDigit + phoneNumberDigit + phoneNumberDigit;
-        	final String password = "password123";
+	private static final String API_PREFIX = "/api/v1";
+	private static final String ENDPOINT = API_PREFIX + "/customers";
 
-            Customer customer = new Customer();
-            customer.setName(name);
-            customer.setPhoneNumber(phone);
-            customer.setPassword(password);
-            return customer;
-        }).forEach(c -> customerRepository.save(c));
-    }
-    
-    @Test
-    public void itShouldReturnCustomersSavedInDb() {
-        // given/when
-        IntStream.rangeClosed(1, 5).mapToObj(i -> {
-        	Long id = (long) i;
-            return id;
-        }).forEach((id) -> {
-        	final String name = "customer_" + id;
-        	final String phoneNumberDigit = String.valueOf(id);
-        	final String phone = phoneNumberDigit + phoneNumberDigit + phoneNumberDigit + phoneNumberDigit;
-        	final String password = "password123";
+	@BeforeAll
+	void init() {
+		insertCustomers();
+	}
 
-            Customer customer = customerRepository.findById(id).get();
+	private void insertCustomers() {
+		IntStream.rangeClosed(1, 5).mapToObj(i -> {
+			final String name = "customer_" + i;
+			final String phoneNumberDigit = String.valueOf(i);
+			final String phone = phoneNumberDigit + phoneNumberDigit + phoneNumberDigit + phoneNumberDigit;
+			final String password = "password123";
 
-            // then
-            assertThat(customer.getId()).isEqualTo(id);
-            assertThat(customer.getName()).isEqualTo(name);
-            assertThat(customer.getPhoneNumber()).isEqualTo(phone);
-            assertThat(customer.getPassword()).isEqualTo(password);
-        });
-    }
-    
-    @Test
-    public void itShouldReturnFivePageableCustomersInOnePageWhenAskingByAllCustomers()
-            throws Exception {
-        // given
-        List<CustomerResponseDto> expectedResponse =
-                IntStream.rangeClosed(1, 5).mapToObj(i -> {
-                	final String name = "customer_" + i;
-                	final String phoneNumberDigit = String.valueOf(i);
-                	final String phone = phoneNumberDigit + phoneNumberDigit + phoneNumberDigit + phoneNumberDigit;
+			Customer customer = new Customer();
+			customer.setName(name);
+			customer.setPhoneNumber(phone);
+			customer.setPassword(password);
+			return customer;
+		}).forEach(c -> customerRepository.save(c));
+	}
 
-                    return customerResponseDtoOf(name, phone);
-                }).collect(Collectors.toList());
+	@Test
+	public void itShouldReturnCustomersSavedInDb() {
+		// given/when
+		IntStream.rangeClosed(1, 5).mapToObj(i -> {
+			Long id = (long) i;
+			return id;
+		}).forEach((id) -> {
+			final String name = "customer_" + id;
+			final String phoneNumberDigit = String.valueOf(id);
+			final String phone = phoneNumberDigit + phoneNumberDigit + phoneNumberDigit + phoneNumberDigit;
+			final String password = "password123";
 
-        // method execution
-        ResultActions resultActions = mvc.perform(get(ENDPOINT)
-                .param("page", "0")
-                .param("size", "10")
-                .contentType(MediaType.APPLICATION_JSON))
-                	.andExpect(jsonPath("$.numberOfElements", is(5)))
-                	.andExpect(jsonPath("$.totalElements", is(5)))
-                	.andExpect(jsonPath("$.last", is(true)))
-                	.andExpect(status().isOk());
+			Customer customer = customerRepository.findById(id).get();
 
-        // assertion
-        isExptectedContentEqualsToPageResults(expectedResponse, resultActions);
-    }
+			// then
+			assertThat(customer.getId()).isEqualTo(id);
+			assertThat(customer.getName()).isEqualTo(name);
+			assertThat(customer.getPhoneNumber()).isEqualTo(phone);
+			assertThat(customer.getPassword()).isEqualTo(password);
+		});
+	}
 
-    @Test
-    public void itShouldReturnThreePageableCustomersInTheFirstPageWhenAskingByAllCustomers()
-            throws Exception {
-        // given
-        List<CustomerResponseDto> expectedResponse =
-                IntStream.rangeClosed(1, 3).mapToObj(i -> {
-                	final String name = "customer_" + i;
-                	final String phoneNumberDigit = String.valueOf(i);
-                	final String phone = phoneNumberDigit + phoneNumberDigit + phoneNumberDigit + phoneNumberDigit;
+	@Test
+	public void itShouldReturnFivePageableCustomersInOnePageWhenAskingByAllCustomers() throws Exception {
+		// given
+		List<CustomerResponseDto> expectedResponse = IntStream.rangeClosed(1, 5).mapToObj(i -> {
+			final String name = "customer_" + i;
+			final String phoneNumberDigit = String.valueOf(i);
+			final String phone = phoneNumberDigit + phoneNumberDigit + phoneNumberDigit + phoneNumberDigit;
 
-                    return customerResponseDtoOf(name, phone);
-                }).collect(Collectors.toList());
+			return customerResponseDtoOf(name, phone);
+		}).collect(Collectors.toList());
 
-        // method execution
-        ResultActions resultActions = mvc.perform(get(ENDPOINT)
-                .param("page", "0")
-                .param("size", "3")
-                .contentType(MediaType.APPLICATION_JSON))
-                	.andExpect(jsonPath("$.numberOfElements", is(3)))
-                	.andExpect(jsonPath("$.totalElements", is(5)))
-                	.andExpect(jsonPath("$.last", is(false)))
-                	.andExpect(status().isOk());
+		// method execution
+		ResultActions resultActions = mvc
+				.perform(get(ENDPOINT).param("page", "0").param("size", "10").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.numberOfElements", is(5))).andExpect(jsonPath("$.totalElements", is(5)))
+				.andExpect(jsonPath("$.last", is(true))).andExpect(status().isOk());
 
-        // assertion
-        isExptectedContentEqualsToPageResults(expectedResponse, resultActions);
-    }
+		// assertion
+		isExptectedContentEqualsToPageResults(expectedResponse, resultActions);
+	}
 
-    @Test
-    public void itShouldReturnTwoPageableCustomersInTheSecondPageWhenAskingByAllCustomers()
-            throws Exception {
-        // given
-        List<CustomerResponseDto> expectedResponse =
-                IntStream.rangeClosed(1, 2).mapToObj(i -> {
-                	int number = i + 3;
-                	final String name = "customer_" + number;
-                	final String phoneNumberDigit = String.valueOf(number);
-                	final String phone = phoneNumberDigit + phoneNumberDigit + phoneNumberDigit + phoneNumberDigit;
+	@Test
+	public void itShouldReturnThreePageableCustomersInTheFirstPageWhenAskingByAllCustomers() throws Exception {
+		// given
+		List<CustomerResponseDto> expectedResponse = IntStream.rangeClosed(1, 3).mapToObj(i -> {
+			final String name = "customer_" + i;
+			final String phoneNumberDigit = String.valueOf(i);
+			final String phone = phoneNumberDigit + phoneNumberDigit + phoneNumberDigit + phoneNumberDigit;
 
-                    return customerResponseDtoOf(name, phone);
-                }).collect(Collectors.toList());
+			return customerResponseDtoOf(name, phone);
+		}).collect(Collectors.toList());
 
-        // method execution
-        ResultActions resultActions = mvc.perform(get(ENDPOINT)
-                .param("page", "1")
-                .param("size", "3")
-                .contentType(MediaType.APPLICATION_JSON))
-                	.andExpect(jsonPath("$.numberOfElements", is(2)))
-                	.andExpect(jsonPath("$.totalElements", is(5)))
-                	.andExpect(jsonPath("$.last", is(true)))
-                	.andExpect(status().isOk());
+		// method execution
+		ResultActions resultActions = mvc
+				.perform(get(ENDPOINT).param("page", "0").param("size", "3").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.numberOfElements", is(3))).andExpect(jsonPath("$.totalElements", is(5)))
+				.andExpect(jsonPath("$.last", is(false))).andExpect(status().isOk());
 
-        // assertion
-        isExptectedContentEqualsToPageResults(expectedResponse, resultActions);
-    }
+		// assertion
+		isExptectedContentEqualsToPageResults(expectedResponse, resultActions);
+	}
 
-    @Test
-    public void itShouldReturnEmptyPageInTheThirdPageWhenAskingByAllCustomers()
-            throws Exception {
-        // given
-        List<CustomerResponseDto> expectedResponse = List.of();
+	@Test
+	public void itShouldReturnTwoPageableCustomersInTheSecondPageWhenAskingByAllCustomers() throws Exception {
+		// given
+		List<CustomerResponseDto> expectedResponse = IntStream.rangeClosed(1, 2).mapToObj(i -> {
+			int number = i + 3;
+			final String name = "customer_" + number;
+			final String phoneNumberDigit = String.valueOf(number);
+			final String phone = phoneNumberDigit + phoneNumberDigit + phoneNumberDigit + phoneNumberDigit;
 
-        // method execution
-        ResultActions resultActions = mvc.perform(get(ENDPOINT)
-                .param("page", "2")
-                .param("size", "3")
-                .contentType(MediaType.APPLICATION_JSON))
-                	.andExpect(jsonPath("$.numberOfElements", is(0)))
-                	.andExpect(jsonPath("$.totalElements", is(5)))
-                	.andExpect(jsonPath("$.last", is(true)))
-                	.andExpect(status().isOk());
+			return customerResponseDtoOf(name, phone);
+		}).collect(Collectors.toList());
 
-        // assertion
-        isExptectedContentEqualsToPageResults(expectedResponse, resultActions);
-    }
-    
-    private CustomerResponseDto customerResponseDtoOf(String name, String phone) {
-    	CustomerResponseDto customerResponseDto =
-                new CustomerResponseDto();
-    	
-    	customerResponseDto.setName(name);
-    	customerResponseDto.setPhoneNumber(phone);
+		// method execution
+		ResultActions resultActions = mvc
+				.perform(get(ENDPOINT).param("page", "1").param("size", "3").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.numberOfElements", is(2))).andExpect(jsonPath("$.totalElements", is(5)))
+				.andExpect(jsonPath("$.last", is(true))).andExpect(status().isOk());
 
-        return customerResponseDto;
-    }
-    
-    private void isExptectedContentEqualsToPageResults(
-            List<CustomerResponseDto> expectedContentPage,
-            ResultActions resultActions) throws JsonMappingException,
-            JsonProcessingException, UnsupportedEncodingException {
+		// assertion
+		isExptectedContentEqualsToPageResults(expectedResponse, resultActions);
+	}
 
-        List<CustomerResponseDto> returnedContentPage =
-                getContentFromResultActions(resultActions);
+	@Test
+	public void itShouldReturnEmptyPageInTheThirdPageWhenAskingByAllCustomers() throws Exception {
+		// given
+		List<CustomerResponseDto> expectedResponse = List.of();
 
-        assertThat(expectedContentPage.size()).isEqualTo(returnedContentPage.size());
+		// method execution
+		ResultActions resultActions = mvc
+				.perform(get(ENDPOINT).param("page", "2").param("size", "3").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.numberOfElements", is(0))).andExpect(jsonPath("$.totalElements", is(5)))
+				.andExpect(jsonPath("$.last", is(true))).andExpect(status().isOk());
 
-        for (int i = 0; i < returnedContentPage.size(); i++) {
-            checkSimpleResult(expectedContentPage.get(i),
-                    returnedContentPage.get(i));
-        }
-    }
-    
-    private List<CustomerResponseDto> getContentFromResultActions(
-            ResultActions resultActions) throws JsonMappingException,
-            JsonProcessingException, UnsupportedEncodingException {
+		// assertion
+		isExptectedContentEqualsToPageResults(expectedResponse, resultActions);
+	}
 
-        String responseAsString =
-                resultActions.andReturn().getResponse().getContentAsString();
+	private CustomerResponseDto customerResponseDtoOf(String name, String phone) {
+		CustomerResponseDto customerResponseDto = new CustomerResponseDto();
 
-        Boolean isResponseEmpty = responseAsString.contains("[]");
+		customerResponseDto.setName(name);
+		customerResponseDto.setPhoneNumber(phone);
 
-        List<CustomerResponseDto> response = null;
+		return customerResponseDto;
+	}
 
-        if (isResponseEmpty) {
-            response = new ArrayList<>();
-        } else {
-            Page<CustomerResponseDto> pageFromResult =
-                    objectMapper.readValue(responseAsString,
-                            new TypeReference<RestResponsePage<CustomerResponseDto>>() {});
+	private void isExptectedContentEqualsToPageResults(List<CustomerResponseDto> expectedContentPage,
+			ResultActions resultActions)
+			throws JsonMappingException, JsonProcessingException, UnsupportedEncodingException {
 
-            response = new ArrayList<>(pageFromResult.getContent().stream()
-                    .collect(Collectors.toList()));
-        }
+		List<CustomerResponseDto> returnedContentPage = getContentFromResultActions(resultActions);
 
-        return response;
-    }
-    
-    private void checkSimpleResult(CustomerResponseDto expectedDto,
-    		CustomerResponseDto resultDto) {
-        assertThat(expectedDto.getName()).isEqualTo(resultDto.getName());
-        assertThat(expectedDto.getPhoneNumber()).isEqualTo(resultDto.getPhoneNumber());
-    }
+		assertThat(expectedContentPage.size()).isEqualTo(returnedContentPage.size());
+
+		for (int i = 0; i < returnedContentPage.size(); i++) {
+			checkSimpleResult(expectedContentPage.get(i), returnedContentPage.get(i));
+		}
+	}
+
+	private List<CustomerResponseDto> getContentFromResultActions(ResultActions resultActions)
+			throws JsonMappingException, JsonProcessingException, UnsupportedEncodingException {
+
+		String responseAsString = resultActions.andReturn().getResponse().getContentAsString();
+
+		Page<CustomerResponseDto> pageFromResult = objectMapper.readValue(responseAsString,
+				new TypeReference<RestResponsePage<CustomerResponseDto>>() {});
+
+		return pageFromResult.getContent();
+	}
+
+	private void checkSimpleResult(CustomerResponseDto expectedDto, CustomerResponseDto resultDto) {
+		assertThat(expectedDto.getName()).isEqualTo(resultDto.getName());
+		assertThat(expectedDto.getPhoneNumber()).isEqualTo(resultDto.getPhoneNumber());
+	}
 
 }

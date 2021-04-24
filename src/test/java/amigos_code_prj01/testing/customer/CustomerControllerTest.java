@@ -1,7 +1,15 @@
 package amigos_code_prj01.testing.customer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -10,13 +18,21 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import amigos_code_prj01.customer.Customer;
 import amigos_code_prj01.customer.CustomerRepository;
+import amigos_code_prj01.customer.CustomerResponseDto;
+import amigos_code_prj01.testing.utils.RestResponsePage;
 
 @SpringBootTest
 @TestPropertySource({"classpath:application-test.properties"})
@@ -32,6 +48,9 @@ public class CustomerControllerTest {
 
     @Autowired
     private CustomerRepository customerRepository;
+    
+    private static final String API_PREFIX = "/api/v1";
+    private static final String ENDPOINT = API_PREFIX + "/customers";
     
     @BeforeAll
     void init() {
@@ -74,4 +93,89 @@ public class CustomerControllerTest {
             assertThat(customer.getPassword()).isEqualTo(password);
         });
     }
+    
+    @Test
+    public void itShouldReturnFivePageableCustomersInOnePageWhenAskingByAllCustomers()
+            throws Exception {
+        // given
+        List<CustomerResponseDto> expectedResponse =
+                IntStream.rangeClosed(1, 5).mapToObj(i -> {
+                	final String name = "customer_" + i;
+                	final String phoneNumberDigit = String.valueOf(i);
+                	final String phone = phoneNumberDigit + phoneNumberDigit + phoneNumberDigit + phoneNumberDigit;
+
+                    return customerResponseDtoOf(name, phone);
+                }).collect(Collectors.toList());
+
+        // method execution
+        ResultActions resultActions = mvc.perform(get(ENDPOINT)
+                .param("page", "0")
+                .param("size", "10")
+                .contentType(MediaType.APPLICATION_JSON))
+                	.andExpect(jsonPath("$.numberOfElements", is(5)))
+                	.andExpect(jsonPath("$.totalElements", is(5)))
+                	.andExpect(jsonPath("$.last", is(true)))
+                	.andExpect(status().isOk());
+
+        // assertion
+        isExptectedContentEqualsToPageResults(expectedResponse, resultActions);
+    }
+    
+    private CustomerResponseDto customerResponseDtoOf(String name, String phone) {
+    	CustomerResponseDto customerResponseDto =
+                new CustomerResponseDto();
+    	
+    	customerResponseDto.setName(name);
+    	customerResponseDto.setPhoneNumber(phone);
+
+        return customerResponseDto;
+    }
+    
+    private void isExptectedContentEqualsToPageResults(
+            List<CustomerResponseDto> expectedContentPage,
+            ResultActions resultActions) throws JsonMappingException,
+            JsonProcessingException, UnsupportedEncodingException {
+
+        List<CustomerResponseDto> returnedContentPage =
+                getContentFromResultActions(resultActions);
+
+        assertThat(expectedContentPage.size()).isEqualTo(returnedContentPage.size());
+
+        for (int i = 0; i < returnedContentPage.size(); i++) {
+            checkSimpleResult(expectedContentPage.get(i),
+                    returnedContentPage.get(i));
+        }
+    }
+    
+    private List<CustomerResponseDto> getContentFromResultActions(
+            ResultActions resultActions) throws JsonMappingException,
+            JsonProcessingException, UnsupportedEncodingException {
+
+        String responseAsString =
+                resultActions.andReturn().getResponse().getContentAsString();
+
+        Boolean isResponseEmpty = responseAsString.contains("[]");
+
+        List<CustomerResponseDto> response = null;
+
+        if (isResponseEmpty) {
+            response = new ArrayList<>();
+        } else {
+            Page<CustomerResponseDto> pageFromResult =
+                    objectMapper.readValue(responseAsString,
+                            new TypeReference<RestResponsePage<CustomerResponseDto>>() {});
+
+            response = new ArrayList<>(pageFromResult.getContent().stream()
+                    .collect(Collectors.toList()));
+        }
+
+        return response;
+    }
+    
+    private void checkSimpleResult(CustomerResponseDto expectedDto,
+    		CustomerResponseDto resultDto) {
+        assertThat(expectedDto.getName()).isEqualTo(resultDto.getName());
+        assertThat(expectedDto.getPhoneNumber()).isEqualTo(resultDto.getPhoneNumber());
+    }
+
 }

@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.TestPropertySource;
 
@@ -145,7 +144,11 @@ class CustomerRepositoryTest {
         
         int idx = 0;
         for(Customer expectedCustomer : expectedCustomers) {
-			assertThat(customersResponse.get(idx++).getId()).isEqualTo(expectedCustomer.getId());
+			assertThat(customersResponse.get(idx).getId()).isEqualTo(expectedCustomer.getId());
+			assertThat(customersResponse.get(idx).getName()).isEqualTo(expectedCustomer.getName());
+			assertThat(customersResponse.get(idx).getPassword()).isEqualTo(expectedCustomer.getPassword());
+			assertThat(customersResponse.get(idx).getPhoneNumber()).isEqualTo(expectedCustomer.getPhoneNumber());
+			idx++;
         }
 	}
 
